@@ -1,2 +1,4 @@
 pandas
 robin_stocks
+onedrivesdk
+msal
