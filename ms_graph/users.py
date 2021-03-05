@@ -9,7 +9,7 @@ class Users():
         self.graph_session: GraphSession = session
 
         # Set the endpoint.
-        self.endpiont = 'users'
+        self.endpoint = 'users'
 
     def list_users(self) -> Dict:
 
