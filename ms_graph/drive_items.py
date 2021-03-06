@@ -1,3 +1,7 @@
+from pprint import pprint
+import os
+import json
+import requests
 from typing import Dict
 from ms_graph.session import GraphSession
 
@@ -162,7 +166,7 @@ class DriveItems():
 
         content = self.graph_session.make_request(
             method='get',
-            endpoint="/me/drive/root:/{item_path}".format(
+            endpoint="me/drive/root:/{item_path}".format(
                 item_path=item_path
             )
         )
@@ -275,7 +279,7 @@ class DriveItems():
         """Grab's a DriveItem Resource using the Item ID and Drive ID.
         ### Parameters
         ----
-        site_id : str
+        user_id : str
             The User ID which to query the item from.
         item_path : str
             The path to the Item.
@@ -294,6 +298,92 @@ class DriveItems():
         )
 
         return content
+
+    def upload_my_drive_item(self, parent_id: str, filename: str, data: Dict) -> Dict:
+        ''' Uploads a new DriveItem resource to a Drive location
+        ### Parameters
+        ----
+        parent_id: str
+            A folder in the current user's drive
+        filename: str
+            The path/filename for the uploaded item
+        ### Returns
+        ----
+        Dict:
+            A DriveItem resource object (if successful).
+        '''
+        #pprint(data)
+
+        content = self.graph_session.make_request(
+            method='put',
+            endpoint='me/drive/{parent_id}:/{filename}:/content'.format(
+                parent_id=parent_id,
+                filename=filename,
+            ),
+            data=data
+        )
+
+        return content
+
+    def create_upload_session(self, item_path: str, item: str) -> Dict:
+        ''' Creates a large file upload session.
+        ### Parameters
+        ----
+        item_path: str
+            Location of final file upload destination.
+        ### Returns
+        ----
+        Dict:
+            Details about the UploadSession
+        '''
+
+        body = {
+            "item": {
+                "@microsoft.graph.conflictBehavior": item
+            }
+        }
+
+        content = self.graph_session.make_request(
+            method='post',
+            endpoint='me/drive/root:/{item_path}:/createUploadSession'.format(
+                item_path=item_path
+            ),
+            json=body
+        )
+
+        return content
+
+    def upload_large_file(self, upload_url: str, file_path: str):
+        
+        file_size = os.path.getsize(file_path)
+        chunk_size = 320*1024*10 # Has to be a multiple of 320Kb
+        no_of_uploads = file_size//chunk_size
+        content_range_start = 0
+
+        if file_size < chunk_size:
+            content_range_end = file_size
+        else:
+            content_range_end = chunk_size - 1
+
+        data = open(file_path, 'rb')
+        while data.tell() < file_size:
+            if ((file_size - data.tell()) <= chunk_size):
+                content_range_end = file_size - 1
+                headers = {
+                    'Content-Range': 'bytes ' + str(content_range_start) + '-' + str(content_range_end) + '/' + str(file_size)
+                }
+                content = data.read(chunk_size)
+                response = json.loads(requests.put(upload_url, headers=headers, data=content).text)
+            else:
+                headers = {
+                    'Content-Range': 'bytes ' + str(content_range_start) + '-' + str(content_range_end) + '/' + str(file_size)
+                }
+                content = data.read(chunk_size)
+                response = json.loads(requests.put(upload_url, headers=headers, data=content).text)
+                content_range_start = data.tell()
+                content_range_end = data.tell() - chunk_size - 1
+        data.close()
+        response2 = requests.delete(upload_url)
 
 
 # GET /drives/{drive-id}/items/{item-id}

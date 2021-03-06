@@ -92,6 +92,7 @@ class GraphSession():
         headers = self.build_headers(mode='json')
 
         print(url)
+        pprint(data)
 
         # Define a new session.
         request_session = requests.Session()

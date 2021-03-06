@@ -1,6 +1,7 @@
 # My file omits
 robinhood/functions/outputs/
 robinhood/functions/config/*
+robinhood/functions/upload.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
