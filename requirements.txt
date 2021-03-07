@@ -2,3 +2,4 @@ pandas
 robin_stocks
 msal
 requests
+openpyxl

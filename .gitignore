@@ -2,6 +2,8 @@
 robinhood/functions/outputs/
 robinhood/functions/config/*
 robinhood/functions/upload.txt
+uploads/
+ms_graph/config/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

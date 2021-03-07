@@ -22,12 +22,13 @@ setup(
             'requests',
             'pandas',
             'msal',
-            'robin_stocks'
+            'robin_stocks',
+            'openpyxl'
         ],
 
         # Specify folder content.
         packages=find_namespace_packages(
-            include=['ms_graph']
+            include=['ms_graph', 'robinhood']
         ),
         
         # Define the python version.
