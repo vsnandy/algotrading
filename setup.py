@@ -23,7 +23,8 @@ setup(
             'pandas',
             'msal',
             'robin_stocks',
-            'openpyxl'
+            'openpyxl',
+            'xlsxwriter'
         ],
 
         # Specify folder content.

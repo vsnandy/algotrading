@@ -3,3 +3,4 @@ robin_stocks
 msal
 requests
 openpyxl
+xlsxwriter
