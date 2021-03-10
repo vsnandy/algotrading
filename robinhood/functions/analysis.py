@@ -1,4 +1,5 @@
 import account
+import helper
 import pandas as pd
 import robin_stocks.robinhood as r
 from pprint import pprint
@@ -32,55 +33,36 @@ def create_holdings_table():
         stock = {**stock, **stats} # merge stats dict with stocks
         data.append(stock) # append to data list
 
-    # store data as a pandas DataFrame
-    df = pd.DataFrame(data)
+    # Write to Excel
+    helper.create_excel(data, 'holdings')
+#
 
-    print("Writing data to Excel...")
+# Get all option orders
+def create_option_orders_table():
+    print("Getting options data...")
 
-    # Create a Pandas Excel writer using XlsxWriter as the engine
-    writer = pd.ExcelWriter('./outputs/holdings.xlsx', engine='xlsxwriter')
+    options = r.get_all_option_orders()
 
-    # Write the dataframe data to Xlsxwriter. Turn off the default header and 
-    # index and skip one row to allow us to insert a user defined header
-    df.to_excel(writer, sheet_name='Sheet1', startrow=1, header=False, index=False)
+    print("Transforming data...")
+    data = options
 
-    # Get the xlsxwriter workbook and worksheet objects.
-    workbook = writer.book
-    worksheet = writer.sheets['Sheet1']
-
-    # Get the dimension of the dataframe
-    (max_row, max_col) = df.shape
-
-    # Create a list of column headers, to use in add_table()
-    column_settings = [{'header': column} for column in df.columns]
-
-    # Add the Excel table structure. Pandas will add the data
-    worksheet.add_table(0, 0, max_row, max_col - 1, {'columns': column_settings})
-
-    # Make the columns wider for clarity.
-    worksheet.set_column(0, max_col - 1, 12)
-
-    # Close the Pandas Excel writer and output the Excel file
-    writer.save()
-
-    print("File created!")
-
-    return df
+    # Write to Excel
+    helper.create_excel(data, 'option_orders')
 #
 
 # Upload all files in /outputs
 def upload_outputs():
     print("Uploading files to OneDrive...")
 
-    # Upload files
-    onedrive.upload(item_path='raspberrypi/test/holdings.xlsx', upload_type='rename', file_path='./outputs/holdings.xlsx')
+    for root, dirs, files in os.walk('./outputs'):
+        for name in files:
+            # Upload files
+            onedrive.upload(item_path='raspberrypi/robinhood/account/{0}'.format(name), upload_type='rename', file_path='./outputs/{0}'.format(name))
+            # Remove local files
+            os.remove('./outputs/{0}'.format(name))
 
-    print("Files uploaded!")
-
-    # Remove local files
-    os.remove('./outputs/holdings.xlsx')
-
-    print("Removed local file copies!")
+    print("Files uploaded and local copies removed!")
+#
 
 # Main method
 if __name__ == "__main__":
@@ -89,8 +71,9 @@ if __name__ == "__main__":
     account.login()
     print("Logged in")
 
-    # Create outputs
-    holdings = create_holdings_table()
+    # Create Excel files
+    create_holdings_table() # current holdings
+    create_option_orders_table() # all option orders
 
     # Upload outputs
     upload_outputs()

@@ -4,3 +4,4 @@ msal
 requests
 openpyxl
 xlsxwriter
+dotenv

@@ -24,7 +24,8 @@ setup(
             'msal',
             'robin_stocks',
             'openpyxl',
-            'xlsxwriter'
+            'xlsxwriter',
+            'dotenv'
         ],
 
         # Specify folder content.
